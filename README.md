@@ -202,6 +202,16 @@ normal-looking page**, and removing them turns a loud failure into a silent one.
 同人文里内嵌的图片常常挂在第三方图床上，**那些链接说没就没**。
 这一步把它们下载到本地，而且**只增不减**：你日后把某张图从文里撤掉，本地那份也照样留着。
 
+> ⚠️ **十有八九你要往图床白名单里加自己常用的站。**
+> `fetch_assets.py` 顶上有个 `ALLOWED_HOSTS`，现在只放了几个常见图床
+> （Twitter / Imgur / Tumblr / Discord / Poipiku），而且**只有 Twitter 是实测过的**。
+>
+> 不用提前研究：**先跑一遍**。脚本会把不在名单里的域名逐个报出来，
+> 并直接告诉你「把 `xxx` 加进 `ALLOWED_HOSTS` 再重跑就行」。照做即可。
+>
+> 加域名是安全的 —— 那份名单只决定「允许去哪儿取图片字节」，
+> 脚本仍然只发 GET，抓不到的会记状态而**不会当成功处理**。
+
 ## Step 6 · `fetch_comments.py` —— 抓评论（含回复层级）
 
 **输出例**

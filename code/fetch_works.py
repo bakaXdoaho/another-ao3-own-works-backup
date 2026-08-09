@@ -5,7 +5,7 @@
 #   2. /works/{id}/navigate        分章发布日期 → data/ao3/works/{id}/navigate.html
 #
 # （slug 与 ?updated_at= 实测均被忽略，见DESIGN-NOTES.md N-02⑥，所以 URL 可以直接构造，
-#   不必先去 work 页抓真实链接 —— 全库省 280 次请求。）
+#   不必先去 work 页抓真实链接 —— 全库省下与作品数相同的请求次数。）
 #
 # 联网请求数：默认只跑 config.FIRST_RUN_WORK_LIMIT 篇（初始 20）（在config.py调整），即最多 40 次。
 #             确认干净后把那个数字调大即可。
@@ -312,7 +312,7 @@ def main() -> int:
                 tmp.replace(wdir / "navigate.html")
                 # 已公开的章数：以索引页的 "13/23" 里的 13 为准。
                 # ⚠️ 20260804 实测：**作为作者登录时，/navigate 会连草稿章一起列出来**。
-                #    圃鹀 索引显示 13/23，navigate 却列了 23 章 —— 多出的 10 章是尚未公开的草稿。
+                #    某篇索引显示 13/23，navigate 却列了 23 章 —— 多出的 10 章是尚未公开的草稿。
                 #    这是白捡的额外信息（自己的草稿章标题与日期），但**绝不能当作公开数据**：
                 #    往公开网站导出时必须过滤 is_draft=1（见DESIGN-NOTES.md N-11 的草稿章发现）。
                 published_n = w["chapters_done"] if w["chapters_done"] is not None else len(rows)

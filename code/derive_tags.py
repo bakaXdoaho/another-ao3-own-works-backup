@@ -3,7 +3,7 @@
 # 现在标签是塞在 works_index 的 5 个 JSON 列里的：
 #   fandoms_json / warnings_json / relationships_json / characters_json / freeforms_json
 # 这样存没错（原样保真），但没法查 ——「某对 CP 写了多少字」
-# 得把 280 行 JSON 全解出来才能回答。本脚本把它摊成两张表，之后就只是写 SQL。
+# 得把整张表的 JSON 全解出来才能回答。本脚本把它摊成两张表，之后就只是写 SQL。
 #
 # 联网请求数：**0**
 # 会写什么：index.sqlite 的 tags / work_tags / series / work_series

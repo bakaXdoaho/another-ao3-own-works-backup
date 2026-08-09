@@ -202,7 +202,8 @@ def main() -> int:
     # 先看第 1 页决定总页数（若本地有新鲜副本则不花请求）
     confirm(
         plan_lines=[
-            f"抓 /users/{config.AO3_USERNAME}/works 的全部页（预计 14 页，每页 20 篇）",
+            # 页数取决于你有多少篇（AO3 每页 20 篇），先抓第 1 页才知道，所以这里不写死
+            f"抓 /users/{config.AO3_USERNAME}/works 的全部页（每页 20 篇，页数看第 1 页才知道）",
             f"原始页写入 data/ao3/index_raw/（覆写同名文件，历史交给 git）",
             f"解析后写入 data/index.sqlite，并输出变更报告",
             f"{config.INDEX_RAW_FRESH_HOURS} 小时内抓过的页会直接复用，不重复请求",

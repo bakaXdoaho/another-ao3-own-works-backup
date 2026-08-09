@@ -4,8 +4,8 @@
 # （改版、需登录、账号状态变化都可能），所以这一步越早做越好。
 #
 # 实测规模（20260805，280 篇全抓完之后统计）：
-#   含图片的作品 16 / 280｜img 标签 25 处｜去重后 **23 个 URL**
-#   域名：pbs.twimg.com ×24、x.com ×1
+#   含图片的作品数、img 标签数、去重后的 URL 数（本项目实测：几十个量级）
+#   域名：绝大多数是同一个图床，另有个别是网页链接而非直链
 #   → 是个小活儿，不是大工程。
 #
 # 联网请求数：正文里内嵌了几个图片 URL 就几次（已抓成功的会跳过）
@@ -62,8 +62,32 @@ CREATE TABLE IF NOT EXISTS asset_refs (
 );
 """
 
-# 只允许图床域名。AO3 的白名单在 ao3_client 里，这里是**另一套**、互不影响。
-ALLOWED_HOSTS = ("pbs.twimg.com", "pbs.twimg.com.", "video.twimg.com")
+# ────────────────────────────────────────────────────────────────
+# 图床白名单。AO3 的白名单在 ao3_client 里，这里是**另一套**、互不影响。
+#
+# ⚠️ **这份名单大概率不够你用，请自己往里加。**
+#    本项目最初只测过推特图床（写这套代码的那个库里恰好都是），
+#    但同人圈常用的图床远不止一家：Tumblr、Lofter、Imgur、Discord、
+#    Poipiku、自建站……你的正文里挂在哪儿，就把哪个域名加进来。
+#
+# 怎么知道该加什么：**直接跑一遍**。脚本会把不在名单里的域名逐个报出来
+#    （「域名是 xxx，不在图床白名单里」），照着加即可，然后重跑。
+#
+# 加进来是安全的：这份名单只决定「允许去哪些域名取图片字节」，
+#    脚本仍然只发 GET，抓不到的会记状态、**不会当成功处理**。
+#
+# 标注说明：✅ = 本项目实测抓成功过；· = 常见但**没实测过**，
+#    留在这里是为了省你查域名的功夫，不保证一定能抓到（有些站点会挡外链）。
+ALLOWED_HOSTS = (
+    # ✅ 实测通过
+    "pbs.twimg.com", "pbs.twimg.com.", "video.twimg.com",   # Twitter / X
+    # · 以下未实测，按需保留或删除
+    "i.imgur.com", "imgur.com",                              # Imgur
+    "64.media.tumblr.com", "media.tumblr.com",               # Tumblr
+    "cdn.discordapp.com", "media.discordapp.net",            # Discord
+    "img-original.poipiku.com", "poipiku.com",               # Poipiku
+    # ← 把你自己的图床加在这里
+)
 
 _IMG_SRC = re.compile(r'<img[^>]+src="([^"]+)"', re.I)
 _IMG_TAG = re.compile(r'<img[^>]*>', re.I)
@@ -157,7 +181,12 @@ def collect_refs() -> tuple:
 def upgrade_to_orig(url: str) -> str:
     """推特图床的 ?name=small/medium/900x900 都是缩略图。
     既然要备份，当然取**最高清的那一版**，所以统一换成 name=orig。
-    原始 URL 仍原样记录在 original_url 里。"""
+    原始 URL 仍原样记录在 original_url 里。
+
+    ⚠️ 这一段**只对推特图床生效**（靠下面那个 endswith 判断）。
+       别的图床有各自的缩略图规则（Tumblr 的 `_500.jpg`、Imgur 的 `xxxs.jpg` 等），
+       没实测过就没写 —— **宁可存下缩略图，也不要拼一个猜出来的 URL**：
+       猜错了会抓到 404，或者更糟：抓到一张不相干的图而毫无察觉。"""
     u = urlparse(url)
     if not u.netloc.endswith("twimg.com"):
         return url
@@ -187,7 +216,10 @@ def main() -> int:
     # ---- 1. 扫描引用（不联网）----
     refs, broken = collect_refs()
     manual, commented_out, ignored = load_manual()
-    say(f"扫描 280 篇下载件：**{len(refs)}** 个不同图片 URL，"
+    # ⚠️ 篇数要**现数**，不能写死。20260809 之前这里硬编码了「280 篇」——
+    #    在本机恰好对，但作者写到第 281 篇时就会报错数，别人拿去跑更是直接错。
+    n_files = len(list(config.WORKS_DIR.glob("*/[0-9]*.html")))
+    say(f"扫描 {n_files} 篇下载件：**{len(refs)}** 个不同图片 URL，"
         f"分布在 **{len({w for ws in refs.values() for w in ws})}** 篇里")
     if broken:
         say("")
@@ -279,8 +311,11 @@ def main() -> int:
         say("")
         for u, w in needs_manual:
             say(f"- work **{w[0]}**：`{u}`")
-            if urlparse(u).netloc not in ("pbs.twimg.com", "video.twimg.com"):
-                say(f"  域名是 `{urlparse(u).netloc}`，不在图床白名单里，所以脚本拿不到图片字节。")
+            host = urlparse(u).netloc
+            if host not in ALLOWED_HOSTS:
+                say(f"  域名是 `{host}`，**不在图床白名单里**，所以脚本拿不到图片字节。")
+                say(f"  → 若这是个正常图床，把 `{host}` 加进 `fetch_assets.py` 的 "
+                    f"`ALLOWED_HOSTS` 再重跑就行。")
                 say(f"  （**这不代表它在 AO3 上显示有问题** —— 那是另一回事，不要据此下结论。）")
             con.execute(
                 "INSERT OR REPLACE INTO assets "
