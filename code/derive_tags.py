@@ -126,7 +126,7 @@ def split_relationship(name: str) -> tuple[int | None, list[str]]:
 def load_synonyms(con) -> dict[tuple[str, str], str]:
     """读归并规则：(kind, 字面) → canonical。只认 status='confirmed' 的。
 
-    ⚠️ 20260805 的一个真 bug，值得留着当例子：
+    ⚠️ 遇到的一个真 bug，值得留着当例子：
        这个函数原先写成 `except sqlite3.OperationalError: pass; return {}`，
        而查询里的列名又写错了（写成 name_literal/name_canonical，
        实际是 literal/canonical）。于是 ——

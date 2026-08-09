@@ -4,7 +4,7 @@
 #    （直接 Run 它也无妨：会拿本地已存的原始页做一次离线自检，不联网、不写任何数据。）
 #
 # 只做解析，不联网、不写盘。这样可以拿已经存下来的原始页离线反复验证。
-# 结构依据：20260804 实测（DESIGN-NOTES.md N-02④）。
+# 结构依据：实测（DESIGN-NOTES.md N-02④）。
 #
 # 设计原则：
 #   * 解析不出来的字段一律留 None，**绝不猜**。
@@ -97,7 +97,7 @@ def parse_blurb(b: str) -> dict | None:
               for p, sid, nm in _RE["series"].findall(b)]
 
     # ---- 合集：**索引页只给数量，不给名字** ----
-    # 20260804 实测：<dd class="collections"><a href="/works/ID/collections">1</a></dd>
+    # 实测：<dd class="collections"><a href="/works/ID/collections">1</a></dd>
     # 那个 "1" 是合集**个数**，不是合集名。第一版把它当名字存了，于是全库只有 "1"/"2" 两个
     # 假合集。合集名字只在官方下载件的 preface 里有（DESIGN-NOTES.md N-07）。
     collections_count = None
@@ -178,7 +178,7 @@ def max_page(html: str) -> int | None:
 
 
 # ---------------------------------------------------------------- 筛选侧边栏
-# 20260804 实测：索引页 HTML 里就带着 AO3 的筛选侧边栏，形如
+# 实测：索引页 HTML 里就带着 AO3 的筛选侧边栏，形如
 #   <input ... id="include_work_search_relationship_ids_99999999" value="99999999" />
 #   <span class="indicator"...></span><span>Yuris Leclair | Yuri Leclerc/Claude von Riegan (172)</span>
 #

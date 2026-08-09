@@ -197,7 +197,7 @@ def probe_navigate(client: AO3Client) -> None:
         return
 
     # 期望形如： <a href="/works/ID/chapters/CID">1. 标题</a> (2022-12-28)
-    # 实测结构（20260804）：
+    # 实测结构：
     #   <li><a href="/works/10000001/chapters/20000001">1. Rhododendron</a>
     #       <span class="datetime">(2022-12-28)</span></li>
     # 第一版正则漏了 <span class="datetime"> 这层包裹，才会解析出 0 章。
@@ -224,7 +224,7 @@ def probe_navigate(client: AO3Client) -> None:
 
 
 # ====================================================================== Q3
-# 20260804 修正：第一版这里用的是宽松关键词，结果被导航栏里的 "Gifts"、"Collections"
+# 修正：第一版这里用的是宽松关键词，结果被导航栏里的 "Gifts"、"Collections"
 # 之类的链接刷出一堆假阳性（gift 报 13 处、Collections 报 13 处，实际 blurb 里
 # 一个 gift 都没有）。现在全部换成实测确认过的**结构性**特征。
 BLURB_CHECKS = {
@@ -344,7 +344,7 @@ def main() -> int:
     say("---")
     say(f"共发出 {client.request_count} 次请求。未修改 AO3 上任何内容。")
 
-    # 20260805 起不再写 reports/ 文件：报告内容与运行记录完全重复
+    # 不再写 reports/ 文件：报告内容与运行记录完全重复
     # （say() 同时往屏幕和报告里写），留两份没有意义。
     # 完整过程见 code/session_printouts/ 里的运行记录。
     print("\n（不再单独写报告文件 —— 上面的完整输出已存进运行记录。）")

@@ -12,8 +12,8 @@
 #       /works/{id}/comments
 #   两者不是一回事。到底哪个能用、返回什么，只能实测。
 #
-# 本次还要特别看清一件事（20260805 作者提供 stats 页数据后才发现的）：
-#   AO3 stats 页报「Comment **Threads** 113」，而索引页 blurb 报的是**评论条数**（全库 346）。
+# 本次还要特别看清一件事：
+#   AO3 stats 页报的是「Comment **Threads**」（评论**串**数），索引页 blurb 报的是**评论条数**。
 #   一串 = 主评论 + 全部回复（作者自己的回复也算进去）。两个数都对，只是口径不同。
 #   → 所以探测时必须看清楚：页面上**能不能分辨主评论与回复、谁回复谁**。
 #     分辨得出来，comments 表才建得对；分辨不出来，就得另想办法。
@@ -73,7 +73,7 @@ def describe(html: str, expected_comments: int = 0) -> None:
         "章节归属 chapter":             r'(?i)on chapter|chapters/(\d+)',
         "分页 next":                    r'(?i)>\s*next\s*(?:→|&#8594;|»)?\s*<',
         "「Comments」小标题":            r'(?i)<h\d[^>]*>\s*Comments',
-        # ---- thread / 回复结构（20260805 加，见下方说明）----
+        # ---- thread / 回复结构----
         "thread 容器 class=thread":     r'class="[^"]*\bthread\b[^"]*"',
         "回复嵌套 ul.thread":            r'<ul[^>]*class="[^"]*thread[^"]*"',
         "「Reply」链接":                 r'(?i)>\s*Reply\s*<',
@@ -93,8 +93,8 @@ def describe(html: str, expected_comments: int = 0) -> None:
         print(f"    页面里出现的 chapter_id：{len(ch)} 个 {ch[:6]}")
 
     # ---- thread vs comment：本次探测最要紧的一件事 ----
-    # AO3 stats 页报的是 **Comment Threads**（113），索引页 blurb 报的是
-    # **评论条数**（全库 346）。一串 = 主评论 + 全部回复（含作者自己的回复）。
+    # AO3 stats 页报的是 **Comment Threads**（串数），索引页 blurb 报的是
+    # **评论条数**。一串 = 主评论 + 全部回复（含作者自己的回复）。
     # 两个数都对，只是口径不同（与DESIGN-NOTES.md N-12 的 canonical/字面标签同类）。
     # 所以这里要看清楚：**页面上能不能分辨「哪条是主评论、哪条是回复、谁回复谁」**。
     # 分辨得出来，comments 表才建得对；分辨不出来，就得另想办法。

@@ -72,7 +72,7 @@ def main() -> int:
     say("")
 
     # ---- 1b. 先把旧的 works_index 整表读进内存 ----
-    # ⚠️ 20260805 实测发现的漏洞：
+    # ⚠️ 这里有个不易察觉的漏洞，必须防：
     #   本脚本会 DROP works_index 再从**当前**索引页重建。
     #   如果某篇作品已从 AO3 上删除，它就不在当前索引页里 ——
     #   于是重建后**这一行凭空消失**，虽然本地 HTML 文件还好好地躺着。
@@ -168,7 +168,7 @@ def main() -> int:
 
     # ---- 3b. 从已保存的作品原始件重建 chapters 与 work_files ----
     # 这两张表和 works_index 一样，**都是派生物**：navigate.html 与 {id}.html 都在本地，
-    # 所以解析器改了、字段加了，都不必重新联网。（20260805 补上，此前只重建了 works_index。）
+    # 所以解析器改了、字段加了，都不必重新联网。
     con.executescript(fetch_works.SCHEMA)
     done_map = {r[0]: r[1] for r in con.execute(
         "SELECT work_id, chapters_done FROM works_index")}
@@ -250,7 +250,7 @@ def main() -> int:
     say("")
     con.close()
 
-    # 20260805 起不再写 reports/ 文件：内容与运行记录完全重复。
+    # 不再写 reports/ 文件：内容与运行记录完全重复。
     print("\n（不再单独写报告文件 —— 完整输出已存进运行记录。）")
     print("联网请求数：0")
     return 0

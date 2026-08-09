@@ -11,7 +11,7 @@
 # ────────────────────────────────────────────────────────────────
 # 一、为什么用 `/works/{id}?show_comments=true&view_full_work=true`
 #
-#   20260805 探测了三种形式（见 probe_comments 那次的运行记录）：
+#   探测过三种形式（`probe_comments.py` 就是干这个的）：
 #     A 这一种 …… 11 条评论，与 blurb 报的 11 完全对上   ✓
 #     B `/works/{id}/comments` …… 标题对，但**一条评论都没有**  ✗
 #     C 单章 + show_comments …… 只出那一章的；本作评论全在第 2 章，
@@ -29,7 +29,7 @@
 #
 # 三、thread ≠ comment
 #
-#   AO3 stats 页报「Comment Threads 113」，索引页 blurb 报的是**评论条数**（全库 346）。
+#   AO3 stats 页报的是「Comment Threads」（串数），索引页 blurb 报的是**评论条数**。
 #   一串 = 主评论 + 全部回复，**作者自己的回复也算在里面**。
 #   两个数都对，只是口径不同。所以本脚本两样都存：
 #   `comments` 存每一条（带 parent_id / depth / thread_root_id），
@@ -177,11 +177,9 @@ def my_user_id(con) -> int | None:
 #
 # **加进来的唯一条件：人真的去 AO3 页面上看过。** 不允许凭猜测加。
 ACCEPTED_MISMATCH = {
-    # 20260805 作者实测：打开 works/10000002?view_full_work=true，按章看也一样，
-    # **页面上一条评论都没有**；抓下来的原文里也确实是空的 <ol class="thread"></ol>。
-    # → 索引页 blurb 的 comments=1 是 AO3 自己的过期计数（评论删了但数字没减）。
-    #   这解释了库里条数与 blurb 合计之间那 1 条之差。
-    10000002: "作者已在 AO3 页面核实：确实没有评论，blurb 计数器过期（20260805）",
+    # 空的。遇到对不上的篇目时，**先自己去 AO3 页面看一眼**，确认确实没有评论，
+    # 再把 work_id 加进来，例如：
+    #     12345678: "已在 AO3 页面核实：确实没有评论，blurb 计数器过期（YYYYMMDD）",
 }
 
 
@@ -449,9 +447,18 @@ def main() -> int:
     print(f"| 别人给的 | {tot - mine:,} |")
     print(f"| 访客（无账号）评论 | {guest:,} |")
 
-    print("\n对照 AO3 stats 页（作者 20260805 提供）：Comment Threads **113**")
-    print(f"  本库串数 {thr}"
-          f"{'：对上了' if thr == 113 else f'：差 {thr - 113:+d}，还没抓全或口径有别，需查'}")
+    # 与 AO3 stats 页的 "Comment Threads" 对一次账。
+    # ⚠️ 参照值要从 config 读，**不能写死** —— 写死就只对某一个库成立。
+    ref = getattr(config, "AO3_STATS_COMMENT_THREADS", None)
+    if ref:
+        print(f"\n对照 AO3 stats 页：Comment Threads **{ref}**")
+        print(f"  本库串数 {thr}"
+              f"{'：对上了' if thr == ref else f'：差 {thr - ref:+d}，还没抓全或口径有别，需查'}")
+    else:
+        print(f"\n本库串（thread）数：**{thr}**")
+        print("  想验一下的话：打开你的 AO3 stats 页（/users/<你的用户名>/stats），")
+        print("  把上面写的 Comment Threads 填进 config.AO3_STATS_COMMENT_THREADS，重跑本脚本。")
+        print("  两边对得上，说明回复层级解析是对的 —— 这两个数来路完全独立。")
 
     if all_bad:
         print(f"\n⚠ 自查发现 {len(all_bad)} 处可疑（**数据已照实存下，没有改动**）：")

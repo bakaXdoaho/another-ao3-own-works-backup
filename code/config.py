@@ -34,7 +34,7 @@ SERIES_DIR = AO3_DIR / "series"
 # 索引页原始 HTML。**覆写同路径**，历史交给 git（与作品件同一策略，DESIGN-NOTES.md N-23）
 INDEX_RAW_DIR = AO3_DIR / "index_raw"
 TEXT_DIR = DATA_DIR / "text"
-# `data/reports/` 已于 20260805 停用（内容与运行记录 100% 重复），
+# `data/reports/` 已于 停用（内容与运行记录 100% 重复），
 # 作者随后把它改名为 `reports_leftover/`。这里**只留常量、不再建目录**：
 #   常量留着，是因为万一还有旧代码引用它，起码不会 NameError；
 #   不建目录，是因为 ensure_dirs() 每次都跑，会把刚改完名的空 `reports/` 又造回来。
@@ -61,7 +61,7 @@ USER_AGENT = (
 # AO3 限流是跨连接共享的：跑脚本时自己别同时刷 AO3。
 # 登录态下限流按账号计，比游客更容易撞，所以间隔放宽。
 # 间隔从「上一次响应结束」开始算（不是从请求开始算）。
-# 20260804 实测：按 8 秒设、请求本身耗 1–3 秒，真实间隔只有 5–7 秒，抓到第 13 页就吃 429。
+# 实测：按 8 秒设、而请求本身耗 1–3 秒，真实间隔只剩 5–7 秒，抓十几页就会吃 429。
 # 所以既调大了间隔，也改了计时口径。
 REQUEST_DELAY_SEC = 15.0         # 普通页面（索引页很重，20 篇 blurb + 全量 tag）
 REQUEST_TIMEOUT_SEC = 60         # 单次请求超时
@@ -72,8 +72,8 @@ DOWNLOAD_DELAY_SEC = 20.0        # /downloads/ 是服务端现生成文件，更
 RATE_LIMIT_RETRIES = 3
 RATE_LIMIT_WAIT_SEC = 300        # 5 分钟
 
-# ---- 临时性故障的自动重试（20260805 加）----
-# 20260805 实测：3 小时的正文抓取被打断 8 次，**没有一次是 429**，
+# ---- 临时性故障的自动重试----
+# 实测：一次长时间的正文抓取被打断了好几次，**没有一次是 429**，
 # 全是 AO3/Cloudflare 侧的临时故障：HTTP 525 ×5、503/502 ×2、读取超时 ×1。
 # 原先只有 fetch_works 在**外层**兜这类错，别的脚本一遇上就直接停。
 # 现在把重试下沉到 ao3_client.get() 里 —— 所有脚本（含探测脚本）都自动获得韧性。
@@ -99,6 +99,15 @@ RESUME_MAX_ROUNDS = 6         # 最多自动续几轮（0 = 不自动续，跑�
 # 目的是「跑到第 9 页断了，重跑不用把前 8 页再抓一遍」。设 0 则每次都重抓。
 INDEX_RAW_FRESH_HOURS = 6
 
+# ---------------------------------------------------------------- 对账参照
+# 你的 AO3 stats 页（/users/<用户名>/stats）上写的 "Comment Threads" 数字。
+# 填了它，fetch_comments 跑完会自动拿本地串数跟它对一次 —— 这是一个**独立**的验算：
+# 本地的串数是从「哪条回复挂在哪条底下」一路推出来的，与 AO3 的计数毫无关系，
+# 两边对得上就说明层级解析是对的。
+#
+# 留 None 就只打印本地数字、不做比对。
+AO3_STATS_COMMENT_THREADS = None
+
 # ---------------------------------------------------------------- 成人内容
 # 无条件带上，无害，且把「成人内容确认闸」这个变量整个消掉。
 ALWAYS_VIEW_ADULT = True
@@ -119,7 +128,7 @@ _FIX_HINT = (
     f"  6. 整串粘贴进 {COOKIE_FILE}（一行，不要加引号）\n"
     "\n  为什么要整条：AO3 的下载接口会检查不止一个 cookie。只给 _otwarchive_session\n"
     "  会被判成「Lost Cookie / Forced Logout」——而且它返回 HTTP 200，页面上还照样写着\n"
-    "  Hi, YOUR_AO3_USERNAME!，属于会静默污染数据的那类失败。（20260804 实测踩到）\n"
+    "  Hi, YOUR_AO3_USERNAME!，属于会静默污染数据的那类失败。\n"
 )
 
 # AO3 会用到的 cookie 名。用来判断文件里是「整条请求头」还是「光秃秃一个值」。
@@ -137,7 +146,7 @@ _CREDENTIAL_COOKIES = ("user_credentials", "remember_user_token")
 #   1. `cf_clearance` 是与 **User-Agent + IP** 绑定的。本项目故意用自报家门的 UA
 #      （不伪装浏览器），UA 对不上反而更容易触发 Cloudflare 质询。
 #   2. `__cf_bm` 只活 30 分钟，带着一个过期的没有任何意义。
-#   3. 20260804 首跑时**根本没带这些**，首页、索引页、navigate 全部正常
+#   3. 首跑时**根本没带这些**，首页、索引页、navigate 全部正常
 #      —— 说明 AO3 的 Cloudflare 对这个 UA 并没有开质询。
 # 万一日后真撞上 Cloudflare 质询，把下面这个改成 True 再试。
 SEND_CLOUDFLARE_COOKIES = False
@@ -254,7 +263,7 @@ def load_cookie() -> str:
 
 def ensure_dirs() -> None:
     """建好所有需要的目录。git 不跟踪空目录，所以每次跑都确认一下。"""
-    # 注意：**REPORTS_DIR 不在这个名单里**（20260805 起）。
+    # 注意：**REPORTS_DIR 不在这个名单里**。
     # 那个文件夹已停用并被作者改名为 reports_leftover/，
     # 若还留在这里，每次跑都会把空的旧目录重新造出来。
     for d in (

@@ -3,7 +3,7 @@
 # 为什么急：正文里的图基本都在推特图床（pbs.twimg.com）。这类链接可能会失效
 # （改版、需登录、账号状态变化都可能），所以这一步越早做越好。
 #
-# 实测规模（20260805，280 篇全抓完之后统计）：
+# 实测规模：
 #   含图片的作品数、img 标签数、去重后的 URL 数（本项目实测：几十个量级）
 #   域名：绝大多数是同一个图床，另有个别是网页链接而非直链
 #   → 是个小活儿，不是大工程。
@@ -136,7 +136,7 @@ def load_manual() -> tuple:
 def missing_dimensions(html: str, url: str) -> bool:
     """这个 <img> 有没有 width/height 属性。**纯属附带观察，不作任何结论。**
 
-    20260805 这里连着判断错了两次，都记下来免得再犯：
+    这里有两种很自然、但都站不住的推断，记下来免得再犯：
 
       ✗ 「缺 width/height ⇒ 图是坏的」
          反例：work 10000004 的图同样没有这两个属性，却下载正常（33 KB）。
@@ -216,8 +216,7 @@ def main() -> int:
     # ---- 1. 扫描引用（不联网）----
     refs, broken = collect_refs()
     manual, commented_out, ignored = load_manual()
-    # ⚠️ 篇数要**现数**，不能写死。20260809 之前这里硬编码了「280 篇」——
-    #    在本机恰好对，但作者写到第 281 篇时就会报错数，别人拿去跑更是直接错。
+    # ⚠️ 篇数要**现数**，不能写死 —— 写死的话，库一变（或换个人跑）报告就会说谎。
     n_files = len(list(config.WORKS_DIR.glob("*/[0-9]*.html")))
     say(f"扫描 {n_files} 篇下载件：**{len(refs)}** 个不同图片 URL，"
         f"分布在 **{len({w for ws in refs.values() for w in ws})}** 篇里")
@@ -433,7 +432,7 @@ def main() -> int:
 
 
 def _write(report: list[str]) -> None:
-    # 20260805 起不再写 reports/ 文件：内容与运行记录完全重复。
+    # 不再写 reports/ 文件：内容与运行记录完全重复。
     print("\n（不再单独写报告文件 —— 完整输出已存进运行记录。）")
 
 

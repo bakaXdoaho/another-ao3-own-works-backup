@@ -105,7 +105,7 @@ class AO3Client:
     def _wait(self) -> None:
         """从**上一次响应结束**开始算间隔，不是从上一次请求开始算。
 
-        20260804 实测教训：原先从「请求开始」计时，请求本身耗 1–3 秒，
+        实测教训：从「请求开始」计时的话，请求本身耗 1–3 秒，
         于是真实间隔只有 5–7 秒而不是设定的 8 秒 —— 抓到第 13 页就吃了 429。
         改成从响应结束计时，设多少就真的隔多少。
         """
@@ -234,7 +234,7 @@ def looks_like_rate_limit(html: str) -> bool:
 
 
 # ---------------------------------------------------------------- 会话守卫
-# 实测确定（20260804，check_login 首次运行）：AO3 已登录页面的头部长这样——
+# 实测确定：AO3 已登录页面的头部长这样——
 #     <nav id="greeting" aria-label="User">
 #       <a href="/users/YOUR_AO3_USERNAME">Hi, YOUR_AO3_USERNAME!</a>
 # 用带用户名的那一句做主判据，比只看 id="greeting" 强：它同时断言「登录的是谁」。
@@ -252,7 +252,7 @@ class SessionLost(Exception):
 class ForcedLogout(SessionLost):
     """AO3 的「Lost Cookie / Forced Logout」页。
 
-    20260804 实测踩到：只带 _otwarchive_session 去请求 /downloads/ 时，AO3 返回
+    实测：只带 _otwarchive_session 去请求 /downloads/ 时，AO3 返回
       · HTTP **200**
       · <title>Lost Cookie Home</title>，正文写着 "Forced Logout"
       · 而页首**照样**渲染着 "Hi, YOUR_AO3_USERNAME!" 和 id="greeting"

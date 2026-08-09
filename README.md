@@ -310,7 +310,7 @@ git commit -m "第一次备份"
 
 ```
 git add -A
-git commit -m "20260808 备份"
+git commit -m "第二次备份"        # 写点自己看得懂的就行
 ```
 
 然后你就可以：

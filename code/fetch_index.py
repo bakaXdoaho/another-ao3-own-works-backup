@@ -393,7 +393,7 @@ def main() -> int:
 
 
 def _write_report() -> None:
-    # 20260805 起不再写 reports/ 文件：内容与运行记录完全重复。
+    # 不再写 reports/ 文件：内容与运行记录完全重复。
     # 完整过程见 code/session_printouts/。
     print(f"\n数据库：{config.INDEX_DB}")
     print("（不再单独写报告文件 —— 完整输出已存进运行记录。）")

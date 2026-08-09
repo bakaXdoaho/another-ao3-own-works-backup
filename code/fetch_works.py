@@ -134,7 +134,7 @@ def check_download(html: str, work_id: int, idx_words: int | None,
 def pick_todo(con) -> list[dict]:
     """挑出还需要处理的作品。
 
-    排序优先级（20260804 修正）：
+    排序优先级：
       ① **半成品**（下载件与 navigate 只成了一个）—— 补完只要 1 次请求，
          而且这种状态最容易被忘掉。原先它们被排到队尾，260 篇里排 189–192，
          等于永远轮不到。
@@ -152,7 +152,7 @@ def pick_todo(con) -> list[dict]:
         ORDER BY
           CASE
             -- ① 半成品最优先：下载件与 navigate 只成了一个，补完只要 1 次请求，
-            --    而且这种状态最容易被忘掉。（20260804 修：原先把它们排到了队尾）
+            --    而且这种状态最容易被忘掉。
             WHEN COALESCE(s.download_status,'') = 'ok'
              AND COALESCE(s.navigate_status,'') <> 'ok' THEN 0
             WHEN COALESCE(s.download_status,'') <> 'ok'
@@ -311,7 +311,7 @@ def main() -> int:
                 tmp.write_text(nav, encoding="utf-8")
                 tmp.replace(wdir / "navigate.html")
                 # 已公开的章数：以索引页的 "13/23" 里的 13 为准。
-                # ⚠️ 20260804 实测：**作为作者登录时，/navigate 会连草稿章一起列出来**。
+                # ⚠️ 实测：**作为作者登录时，/navigate 会连草稿章一起列出来**。
                 #    某篇索引显示 13/23，navigate 却列了 23 章 —— 多出的 10 章是尚未公开的草稿。
                 #    这是白捡的额外信息（自己的草稿章标题与日期），但**绝不能当作公开数据**：
                 #    往公开网站导出时必须过滤 is_draft=1（见DESIGN-NOTES.md N-11 的草稿章发现）。
@@ -398,9 +398,9 @@ def main() -> int:
     say(f"共发出 {client.request_count} 次请求。未修改 AO3 上任何内容，未删除任何本地文件。")
 
     # 只有「出了要人处理的事」才写报告文件。
-    # 20260805：例行抓取的报告与运行记录内容几乎完全重复（23 个报告里 10 个是这种），
+    # 例行抓取的报告与运行记录内容几乎完全重复（23 个报告里 10 个是这种），
     # 属于冗余。现在改成：一切正常就不写文件，运行记录里已经全都有了。
-    # 20260805 起不再写 reports/ 文件：内容与运行记录完全重复。
+    # 不再写 reports/ 文件：内容与运行记录完全重复。
     print("\n（不再单独写报告文件 —— 完整过程见上方运行记录。）")
     con.close()
     return 0

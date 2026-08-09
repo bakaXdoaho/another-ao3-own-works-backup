@@ -23,7 +23,7 @@ from pathlib import Path
 
 # 本模块**只用标准库**，不 import config —— 这样它永远能被最先导入，
 # 于是「其它模块 import 时就崩了」这种最该留档的失败也能被记下来。
-# （20260804 踩到：config.py 用了 Python 3.10 才有的 `str | None`，
+# （踩过：config.py 用了 Python 3.10 才有的 `str | None`，
 #   在 3.9 上 import 阶段就抛 TypeError，当时整次运行一行日志都没留下。）
 
 CODE_DIR = Path(__file__).resolve().parent
