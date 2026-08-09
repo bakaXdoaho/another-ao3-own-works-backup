@@ -5,7 +5,7 @@
 #   Q2  ?updated_at= 参数是缓存键还是被忽略？
 #   Q3  作品索引页的 blurb 里到底有哪些字段？特别是：有没有 gift？summary 会不会被截断？
 #   Q4  /navigate 的分章日期格式是否如预期
-#   Q5（免费）  我们抓下来的下载件，与浏览器手动下的那份是否逐字节一致
+#   Q5（免费）  脚本抓下来的下载件，与浏览器手动下的那份是否逐字节一致
 #
 # 联网请求数：5（3 次 downloads + 1 次 navigate + 1 次索引页）
 # 会写什么：data/probe_raw/ 下的原始响应；data/reports/ 下一份 markdown 报告
@@ -77,7 +77,7 @@ def probe_downloads(client: AO3Client) -> dict[str, str]:
     say("\n## Q1 / Q2 · 下载 URL 的 slug 与 ?updated_at= 参数")
     say("")
     say("做法：对同一篇作品用三种 URL 各取一次，比对内容哈希。")
-    say("三份完全相同 → 说明 slug 与 updated_at 都被忽略，我们可以自由构造下载 URL。")
+    say("三份完全相同 → 说明 slug 与 updated_at 都被忽略，可以自由构造下载 URL。")
     say("")
 
     cases = [
@@ -219,7 +219,7 @@ def probe_navigate(client: AO3Client) -> None:
         say(f"  日期单调递增？{'是' if dates == sorted(dates) else '**否** —— 与DESIGN-NOTES.md N-10 预期一致，排序一律按章号'}")
     else:
         say("  ⚠ 预期正则没匹配到东西 —— 页面结构与假设不同。")
-        say(f"    请把 `{raw.name}` 发我看看。")
+        say(f"    留着 `{raw.name}`，它是排查的依据。")
     say("")
 
 

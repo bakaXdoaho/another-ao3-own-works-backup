@@ -32,7 +32,7 @@ except Exception as _import_error:      # 导入阶段就崩的话，也要留�
 # 否则「只是 import 一下做测试」也会凭空生出一份运行记录。
 
 
-# 候选的「已登录」标记。AO3 改版时这些可能变，所以我们**同时查一组**，
+# 候选的「已登录」标记。AO3 改版时这些可能变，所以**同时查一组**，
 # 并把每一条的命中情况都打印出来，由人确认哪一条最可靠 —— 而不是写死一条然后静默失败。
 LOGGED_IN_MARKERS = {
     "greeting 区块 (id=greeting)":      re.compile(r'id="greeting"'),
@@ -134,12 +134,12 @@ def main() -> int:
         rc = 1
     elif not hits_in and not hits_out:
         print("? 判定：两组标记都没命中 —— 说明 AO3 页面结构与预期不同。")
-        print("  这不代表出错了，只说明我猜的标记不对。")
-        print(f"  请把这个文件发我看看：{raw_path}")
+        print("  这不代表出错了，只说明这组标记的猜测不对。")
+        print(f"  留着这个文件，它是排查的依据：{raw_path}")
         rc = 3
     else:
         print("? 判定：两组标记都有命中，需要人看一眼。")
-        print(f"  请把这个文件发我看看：{raw_path}")
+        print(f"  留着这个文件，它是排查的依据：{raw_path}")
         rc = 3
     print("=" * 60)
     print(f"\n本次共发出 {client.request_count} 次请求。未修改 AO3 上任何内容。")

@@ -175,7 +175,7 @@ def fetch_page(client: AO3Client, page: int) -> tuple[str, bool]:
     if n == 0:
         raise FetchFailed(
             f"第 {page} 页解析出 0 个 blurb —— 页面结构可能变了。"
-            f"原始页已存到 {config.PROBE_RAW_DIR}，请发我看看。"
+            f"原始页已存到 {config.PROBE_RAW_DIR}，留着它对照排查。"
         )
 
     # 先写临时文件，校验通过才移动到正式位置（绝不原地覆盖）

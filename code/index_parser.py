@@ -141,7 +141,7 @@ def parse_blurb(b: str) -> dict | None:
         m3 = rx.search(b)
         row[k] = _int(m3.group(1)) if m3 else None
 
-    # blurb 指纹：只挑「会变且我们在乎」的字段，避免 hits/kudos 天天变导致全库误报
+    # blurb 指纹：只挑「会变且需要关心」的字段，避免 hits/kudos 天天变导致全库误报
     fingerprint = json.dumps({
         k: row[k] for k in (
             "title", "updated_at_unix", "date_text", "rating", "category",
@@ -246,7 +246,7 @@ if __name__ == "__main__":
         print(f"\n{path.name}：解析出 {len(rows)} 篇"
               f"｜页面自报总数 {page_total_works(html)}｜最大页码 {max_page(html)}")
         if not rows:
-            print("  ⚠ 一篇都没解析出来 —— 页面结构可能变了，请把这个文件发我看看。")
+            print("  ⚠ 一篇都没解析出来 —— 页面结构可能变了，留着这个文件对照排查。")
             continue
         miss = [k for k in scalar
                 if sum(1 for r in rows if r.get(k) not in (None, "", [])) == 0]

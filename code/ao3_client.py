@@ -57,7 +57,7 @@ class FetchFailed(Exception):
 
 
 class CloudflareChallenge(FetchFailed):
-    """AO3 前面的 Cloudflare 拦下了我们。与 AO3 自己的限流是两回事，分开报。"""
+    """AO3 前面的 Cloudflare 拦下了请求。与 AO3 自己的限流是两回事，分开报。"""
 
 
 _CF_HINTS = ("just a moment", "cf-browser-verification", "cf_chl_", "attention required")

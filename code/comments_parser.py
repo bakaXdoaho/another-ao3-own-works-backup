@@ -25,11 +25,11 @@
 #       <ol class="thread">         ← 回复挂在**另一个** <li> 里
 #         <li class="… comment …" id="comment_30000002">   ← 这才是上一条的回复
 #
-# ⚠️ 最要命的一点，我第一版就写错了：
+# ⚠️ 最要命的一点，也是最容易写错的地方：
 #   **回复并不嵌在被回复的那条 `<li>` 里面。** 被回复的 `<li>` 先闭合，
 #   然后跟一个**没有 id 的空壳 `<li>`**，回复的 `<ol class="thread">` 才在那里面。
 #   所以「数栈上有几个评论 li」来判断层级，**永远得 0**——
-#   我第一次跑出来「11 条全是顶层」就是这么来的，看着还挺像回事。
+#   跑出来「11 条全是顶层」就是这么来的，看着还挺像回事。
 #   正确做法：**层级由嵌套的 `<ol class="thread">` 决定**，与 `<li>` 无关。
 #   改正后同一份文件解析出：**2 串、11 条、最深 7 层**，
 #   与 AO3 stats 页「Comment Threads 113 / 评论 346」的口径正好对得上（约 1:3）。
@@ -77,7 +77,7 @@ def has_pagination(segment: str) -> bool:
 def next_page_href(segment: str) -> str | None:
     """取 AO3 自己给的「下一页」链接。
 
-    **不自己拼 URL。** 我没实测过评论分页的参数长什么样，
+    **不自己拼 URL。** 评论分页的参数没有实测过，
     拼错了要么抓空要么抓错篇，还不会报错。用页面上现成的 href 最稳。
     """
     m = re.search(r'<a[^>]+href="([^"]+)"[^>]*>\s*Next\s*(?:&#8594;|→|»)?\s*</a>',
@@ -138,7 +138,7 @@ def _clean(h: str | None) -> str | None:
 def _blockquote(chunk: str) -> str | None:
     """取第一个 blockquote.userstuff 的**内层 HTML**。
 
-    读者正文里可能自己也用 blockquote（引用我的原文），所以要数层级配对，
+    读者正文里可能自己也用 blockquote（引用作品原文），所以要数层级配对，
     不能拿最近的 </blockquote> 了事。
     """
     m = _BQ_OPEN.search(chunk)

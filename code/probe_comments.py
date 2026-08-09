@@ -1,14 +1,14 @@
 # probe_comments.py —— 阶段 F 的前置探测：评论页到底长什么样
 #
 # 为什么要先探测：
-#   **我从没见过 AO3 的评论页。** 按本项目一路踩出来的规矩（见 DESIGN-NOTES.md 第九节：不报错的错误最难对付），
+#   **写这段时还没见过 AO3 的评论页长什么样。** 按本项目一路踩出来的规矩（见 DESIGN-NOTES.md 第九节：不报错的错误最难对付），
 #   没实际请求过、没看过返回内容，就不该写解析器 —— 那样写出来的东西
 #   要么静默出错，要么给出自信的错误答案。
 #
-# 而且已经有一条线索说明我的假设可能就是错的：
+# 而且已经有一条线索说明那个假设可能就是错的：
 #   索引页 blurb 里，AO3 自己给评论的链接是
 #       /works/10000006?show_comments=true&view_full_work=true#comments
-#   而我当初往白名单里塞的是
+#   而当初往白名单里塞的是
 #       /works/{id}/comments
 #   两者不是一回事。到底哪个能用、返回什么，只能实测。
 #
@@ -141,7 +141,7 @@ def main() -> int:
     cases = [
         ("A. AO3 自己在 blurb 里用的形式",
          f"/works/{SAMPLE_WORK}", {"show_comments": "true", "view_full_work": "true"}),
-        ("B. 我当初塞进白名单的猜测",
+        ("B. 当初塞进白名单的猜测",
          f"/works/{SAMPLE_WORK}/comments", None),
         ("C. 单章形式（评论是按章挂的，所以也试试）",
          None, None),          # 运行时再填 chapter_id
@@ -187,8 +187,8 @@ def main() -> int:
 
     print("\n" + "=" * 62)
     print("探测结束。**没有写入任何数据，也没有写解析器。**")
-    print("把上面的输出（以及需要的话 data/probe_raw/ 里那三个文件）发我，")
-    print("我据实际结构写 fetch_comments.py —— 而不是照假设写。")
+    print("把上面的输出（以及 data/probe_raw/ 里那三个文件）留好，")
+    print("解析器要照实际结构写 —— 而不是照假设写。")
     print(f"\n共发出 {client.request_count} 次请求。")
     return 0
 

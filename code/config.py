@@ -134,11 +134,11 @@ _CREDENTIAL_COOKIES = ("user_credentials", "remember_user_token")
 # ---------------------------------------------------------------- Cloudflare
 # AO3 前面挂着 Cloudflare，浏览器里会多出 cf_clearance / __cf_bm / _cfuvid 这几个。
 # **默认不发给 AO3**，理由三条：
-#   1. `cf_clearance` 是与 **User-Agent + IP** 绑定的。我们故意用自报家门的 UA
+#   1. `cf_clearance` 是与 **User-Agent + IP** 绑定的。本项目故意用自报家门的 UA
 #      （不伪装浏览器），UA 对不上反而更容易触发 Cloudflare 质询。
 #   2. `__cf_bm` 只活 30 分钟，带着一个过期的没有任何意义。
 #   3. 20260804 首跑时**根本没带这些**，首页、索引页、navigate 全部正常
-#      —— 说明 AO3 的 Cloudflare 对我们这个 UA 并没有开质询。
+#      —— 说明 AO3 的 Cloudflare 对这个 UA 并没有开质询。
 # 万一日后真撞上 Cloudflare 质询，把下面这个改成 True 再试。
 SEND_CLOUDFLARE_COOKIES = False
 _CLOUDFLARE_COOKIES = ("cf_clearance", "__cf_bm", "_cfuvid", "__cflb", "cf_chl_rc_m")

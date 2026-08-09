@@ -2,7 +2,7 @@
 #
 # 现在标签是塞在 works_index 的 5 个 JSON 列里的：
 #   fandoms_json / warnings_json / relationships_json / characters_json / freeforms_json
-# 这样存没错（原样保真），但没法查 ——「库罗德/尤里斯这对我写了多少字」
+# 这样存没错（原样保真），但没法查 ——「某对 CP 写了多少字」
 # 得把 280 行 JSON 全解出来才能回答。本脚本把它摊成两张表，之后就只是写 SQL。
 #
 # 联网请求数：**0**
@@ -24,11 +24,11 @@
 #
 # ② **`/` 与 `&` 语义不同，不能混。**（DESIGN-NOTES.md N-06②）
 #    `/` = 恋爱向，`&` = 友情/gen 向。`配置表` 三条全是 `&` 且 Category: Gen。
-#    若按 CP 统计时把两者合并，等于把「我写了他俩的友情」算成「我写了他俩的恋爱」。
+#    若按 CP 统计时把两者合并，等于把「写了他俩的友情」算成「写了他俩的恋爱」。
 #    → 存 `is_romantic`：`/` → 1，`&` → 0。
 #
 # ③ **一篇多 CP 会被重复计入，这是对的。**（DESIGN-NOTES.md N-28）
-#    问「这对 CP 我写了多少字」时，多 CP 的篇目本来就该算进去。
+#    问「这对 CP 写了多少字」时，多 CP 的篇目本来就该算进去。
 #    所以各行相加会大于全库总字数 —— 报表上必须写明，否则看的人会以为算错了。
 
 from __future__ import annotations
@@ -308,7 +308,7 @@ def main() -> int:
     print(f"  三人及以上的 CP 标签：{n3} 个")
 
     # ---- 自动找出「还没有归并规则的 implied 标签」----
-    # 为什么每次都查：AO3 的 wrangler 会把 `implied X` 归到 `X`，而我们的归并规则
+    # 为什么每次都查：AO3 的 wrangler 会把 `implied X` 归到 `X`，而归并规则
     # 是一条条人工确认加进 tag_synonyms 的（DESIGN-NOTES.md N-12）。新写的篇随时可能带来新的
     # implied 变体，**漏掉一个，canonical 统计就少算一篇**，而且悄无声息。
     # 这里只**报告**，绝不自动归并 —— 「看起来该并」和「确实是同一个」是两回事。

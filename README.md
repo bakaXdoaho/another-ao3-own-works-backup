@@ -80,7 +80,7 @@ normal-looking page**, and removing them turns a loud failure into a silent one.
    不想装也行，用终端 `python3 脚本名.py` 一样。
 3. 你的 **AO3 账号**，和一次**复制 cookie** 的操作（下面第 0 步）。
 4. **（可选）git** —— 用来记录「这次跑完，比上次多了什么、少了什么」。
-   完全可以先不管，跳过它一样能用；等你想知道「AO3 上哪篇被我改过」的时候再回来看
+   完全可以先不管，跳过它一样能用；等你想知道「AO3 上哪篇被改过」的时候再回来看
    最后那一节《（可选）用 git 看出每次的变化》。
 
 装好之后，把这个GitHub仓库下载下来（绿色 `Code` 按钮 → Download ZIP），解压。

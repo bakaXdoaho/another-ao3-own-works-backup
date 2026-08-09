@@ -30,10 +30,10 @@
 # 三、thread ≠ comment
 #
 #   AO3 stats 页报「Comment Threads 113」，索引页 blurb 报的是**评论条数**（全库 346）。
-#   一串 = 主评论 + 全部回复，**我自己的回复也算在 346 里**。
+#   一串 = 主评论 + 全部回复，**作者自己的回复也算在里面**。
 #   两个数都对，只是口径不同。所以本脚本两样都存：
 #   `comments` 存每一条（带 parent_id / depth / thread_root_id），
-#   `comment_threads` 存每一串的汇总。日后问「我收到多少评论」才答得对。
+#   `comment_threads` 存每一串的汇总。日后问「收到过多少评论」才答得对。
 
 from __future__ import annotations
 
@@ -158,7 +158,7 @@ def check_invariants(rows: list[dict]) -> list[str]:
 
 
 def my_user_id(con) -> int | None:
-    """我自己的 AO3 数字 id。索引页 blurb 的 class 里就带着（user-40000001）。"""
+    """自己的 AO3 数字 id。索引页 blurb 的 class 里就带着（user-40000001）。"""
     for p in sorted(config.INDEX_RAW_DIR.glob("page-*.html")):
         m = re.search(r'class="[^"]*\buser-(\d+)\b', p.read_text(encoding="utf-8",
                                                                  errors="ignore"))
@@ -273,7 +273,7 @@ def main() -> int:
     config.COMMENTS_DIR.mkdir(parents=True, exist_ok=True)
 
     me = my_user_id(con)
-    print(f"\n我的 AO3 数字 id：{me if me else '（没找出来，is_mine 一律记 0）'}")
+    print(f"\n你的 AO3 数字 id：{me if me else '（没找出来，is_mine 一律记 0）'}")
 
     with_comments = con.execute(
         "SELECT COUNT(*), SUM(comments) FROM works_index WHERE COALESCE(comments,0)>0"
@@ -344,7 +344,7 @@ def main() -> int:
         ok += status == "ok"
         mismatch += status == "mismatch"
 
-        print(f"    ✓ {len(rows)} 条 / {len(threads)} 串｜我自己的回复 {n_mine} 条"
+        print(f"    ✓ {len(rows)} 条 / {len(threads)} 串｜自己的回复 {n_mine} 条"
               f"｜别人的 {len(rows) - n_mine} 条"
               f"｜最深 {max((r['depth'] for r in rows), default=0) + 1} 层"
               f"｜{pages} 页")
@@ -445,8 +445,8 @@ def main() -> int:
     if gap:
         print(f"| 其中已核实的 blurb 虚高 | {gap:,} |")
     print(f"| 串（thread）数 | {thr:,} |")
-    print(f"| 其中我自己的回复 | {mine:,} |")
-    print(f"| 别人给我的 | {tot - mine:,} |")
+    print(f"| 其中自己的回复 | {mine:,} |")
+    print(f"| 别人给的 | {tot - mine:,} |")
     print(f"| 访客（无账号）评论 | {guest:,} |")
 
     print("\n对照 AO3 stats 页（作者 20260805 提供）：Comment Threads **113**")
