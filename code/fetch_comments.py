@@ -450,10 +450,25 @@ def main() -> int:
     # 与 AO3 stats 页的 "Comment Threads" 对一次账。
     # ⚠️ 参照值要从 config 读，**不能写死** —— 写死就只对某一个库成立。
     ref = getattr(config, "AO3_STATS_COMMENT_THREADS", None)
+    read_on = getattr(config, "AO3_STATS_COMMENT_THREADS_READ_ON", None)
     if ref:
-        print(f"\n对照 AO3 stats 页：Comment Threads **{ref}**")
-        print(f"  本库串数 {thr}"
-              f"{'：对上了' if thr == ref else f'：差 {thr - ref:+d}，还没抓全或口径有别，需查'}")
+        age = ""
+        if read_on:
+            try:
+                d = datetime.datetime.strptime(str(read_on), "%Y%m%d").date()
+                age = f"（{read_on} 抄的，已过 {(datetime.date.today() - d).days} 天）"
+            except ValueError:
+                age = f"（{read_on} 抄的）"
+        print(f"\n对照 AO3 stats 页：Comment Threads **{ref}**{age}")
+        if thr == ref:
+            print(f"  本库串数 {thr}：对上了")
+        else:
+            print(f"  本库串数 {thr}：差 {thr - ref:+d}")
+            # ⚠️ 这个参照值是**手抄**的，会随新评论增长而过期。
+            #    所以差额的第一嫌疑是「参照值旧了」，不是「数据坏了」。
+            print("  → 先看参照值是不是过期了：打开 stats 页核对一下，"
+                  "顺手更新 config 里那两行（数字 + 日期）。")
+            print("     若 stats 页写的就是这个数，那才轮到查抓取口径。")
     else:
         print(f"\n本库串（thread）数：**{thr}**")
         print("  想验一下的话：打开你的 AO3 stats 页（/users/<你的用户名>/stats），")
