@@ -142,9 +142,15 @@ def parse_blurb(b: str) -> dict | None:
         row[k] = _int(m3.group(1)) if m3 else None
 
     # blurb 指纹：只挑「会变且需要关心」的字段，避免 hits/kudos 天天变导致全库误报
+    # ⚠️ **`updated_at_unix` 已从指纹里去掉。**
+    #    它是 AO3 给 blurb 片段做缓存时写下的时间戳，不是作品更新时间 ——
+    #    实测 280 篇只有 22 个不同取值、99% 与别人共用、一次重抓 66 篇一起变。
+    #    而这个哈希的用途是「改了但没推进 updated 的检测」（见文件头）：
+    #    把一个会自己抖动的东西放进去，哈希就会在作品没变时照样变，检测因此失效。
+    #    详见DESIGN-NOTES.md N-02③ 的更正。
     fingerprint = json.dumps({
         k: row[k] for k in (
-            "title", "updated_at_unix", "date_text", "rating", "category",
+            "title", "date_text", "rating", "category",
             "required_warning", "is_wip", "language", "chapters_text", "words",
             "fandoms", "warnings", "relationships", "characters", "freeforms",
             "series", "collections_count", "summary_text",

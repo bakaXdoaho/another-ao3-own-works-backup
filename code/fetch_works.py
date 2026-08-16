@@ -4,8 +4,24 @@
 #   1. /downloads/{id}/{id}.html   官方下载件 → data/ao3/works/{id}/{id}.html
 #   2. /works/{id}/navigate        分章发布日期 → data/ao3/works/{id}/navigate.html
 #
-# （slug 与 ?updated_at= 实测均被忽略，见DESIGN-NOTES.md N-02⑥，所以 URL 可以直接构造，
-#   不必先去 work 页抓真实链接 —— 全库省下与作品数相同的请求次数。）
+# （slug 实测被忽略，所以 URL 可以直接构造，不必先去 work 页抓真实链接 —— 省 280 次请求。）
+#
+# ⚠️ **但 `?updated_at=` 不是被忽略的 —— 它是缓存键。推翻了 N-02⑥ 的那半句。**
+#   N-02⑥ 当年拿三种 URL 各取一次、三份字节完全相同，于是断定两个参数都被忽略。
+#   **那个实验没有能力发现真相**：它跑在一篇「缓存本来就是最新」的作品上 ——
+#   缓存键只有在缓存**过期**时才显形。三次请求命中的是同一份有效缓存，
+#   所以「参数不影响内容」是真的，「参数无所谓」是过度推论。
+#
+#   实证：某篇多章作品更新之后，
+#     · 浏览器下载（AO3 自带链接，带 ?updated_at=）→ 拿到的是**新的**
+#     · 本脚本（当时不带该参数）→ 拿到的是旧的，**11 小时内三次抓取字节完全一样**
+#   → 每次请求的都是同一个 URL，于是一直命中同一条陈旧缓存。
+#
+#   现在带上 `?updated_at=`（取索引 blurb 里的那个值）。它只在**本来就决定要重抓**
+#   的作品上变化，所以不会平白让服务器多生成文件。
+#   顺带：那个值其实是 AO3 的 blurb 缓存戳、不是作品更新时间（99% 的作品与别人共用取值），
+#   但**当缓存键用不需要它有那个含义** —— 只要它在作品变了的时候会变就够了。
+#   （同一个字段两种用法：当变更信号不成立，当缓存键成立。）
 #
 # 联网请求数：默认只跑 config.FIRST_RUN_WORK_LIMIT 篇（初始 20）（在config.py调整），即最多 40 次。
 #             确认干净后把那个数字调大即可。
@@ -245,7 +261,12 @@ def main() -> int:
         # ---------- 1. 下载件 ----------
         if w["download_status"] != "ok" or (w["fetched_updated_at"] or 0) < (w["updated_at_unix"] or 0):
             try:
-                html = client.get(f"/downloads/{wid}/{wid}.html")
+                # ★ 带上 updated_at 破缓存（理由见文件头）。
+                #   值取索引 blurb 里的那个 —— 正好也是上面判断「要不要重抓」用的同一个值。
+                dl_params = {}
+                if w["updated_at_unix"]:
+                    dl_params["updated_at"] = str(w["updated_at_unix"])
+                html = client.get(f"/downloads/{wid}/{wid}.html", params=dl_params or None)
             except SessionLost as e:
                 stopped = f"登录态失效：{e}"
                 break

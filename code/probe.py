@@ -77,7 +77,14 @@ def probe_downloads(client: AO3Client) -> dict[str, str]:
     say("\n## Q1 / Q2 · 下载 URL 的 slug 与 ?updated_at= 参数")
     say("")
     say("做法：对同一篇作品用三种 URL 各取一次，比对内容哈希。")
-    say("三份完全相同 → 说明 slug 与 updated_at 都被忽略，可以自由构造下载 URL。")
+    say("")
+    say("⚠️ 更正：**这个探测对 `?updated_at=` 是无效的，别据此下结论。**")
+    say("   它跑在一篇「缓存本来就是最新」的作品上，三种 URL 自然返回相同字节 ——")
+    say("   而 `?updated_at=` 是**缓存键**，只有在缓存**过期**时才显形。")
+    say("   当年据此断定「updated_at 被忽略」，结果作品更新后连取三次都是旧文件。")
+    say("")
+    say("   → slug 那一半仍然成立（错 slug 也返回同样内容）。")
+    say("   → updated_at 那一半要这样测：**先更新一篇作品，再比对带与不带该参数的结果**。")
     say("")
 
     cases = [

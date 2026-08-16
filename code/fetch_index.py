@@ -121,8 +121,19 @@ SCALAR_FIELDS = [
     "blurb_hash",
 ]
 # 变了就值得报告的字段（hits/kudos 天天变，不算「改动」，单独看）
+# ⚠️ 移出两个：
+#   · `updated_at_unix` —— 是 blurb 的**缓存戳**不是作品更新时间。实测一次重抓
+#     40 篇「有改动」且**全部只改了这一个字段**，新值只有两个（66 篇共用一个值）。
+#     它留在库里当缓存键用（fetch_works 拿它破缓存），但**不该再当变更信号**。
+# `date_text` **保留在名单里**（作者 要求）：作者会刻意改发布日，
+#   那是真信号，不能不报。但读它时要知道 blurb 是**缓存片段、按 UTC 渲染**：
+#   本地午夜后几小时发的作品会比实际日期早一天（227 篇单章里 18 篇如此，
+#   **全是早、没有晚**）。那 18 篇的偏移是**长期固定**的，不会每轮抖动；
+#   只有 blurb 缓存换了渲染上下文时才会翻一次。
+#   → **看到 ±1 天变化时，去对 `chapters.published_at`**：那边跟着动才是真改了发布日。
+#   见DESIGN-NOTES.md N-02③b。
 WATCHED = [
-    "title", "updated_at_unix", "date_text", "rating", "category",
+    "title", "date_text", "rating", "category",
     "required_warning", "is_wip", "language", "chapters_text", "words",
     "fandoms_json", "warnings_json", "relationships_json", "characters_json",
     "freeforms_json", "series_json", "collections_count", "summary_text",

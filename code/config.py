@@ -43,6 +43,15 @@ PROBE_RAW_DIR = DATA_DIR / "probe_raw"
 COMMENTS_DIR = DATA_DIR / "comments"
 PRIVATE_DIR = DATA_DIR / "private"
 
+# 合库那条线**唯一允许写**的地方。
+# `private/` 下的其它一切一律只读 —— 那是作者天天在改的活文件。
+# 输出**不要平铺在这里**，按类别进子目录（`parsed/` 等），见
+# 《data-统一登记与合库-方案-》N-23.3。
+# ⚠️ 故意**不放进 ensure_dirs()**：子目录由各脚本自己按需建。
+#    理由同上面 REPORTS_DIR 那条 —— ensure_dirs 每次都跑，
+#    会把人刚清掉的空目录又造回来。
+LOCAL_DATASET_DIR = PRIVATE_DIR / "local_dataset"
+
 INDEX_DB = DATA_DIR / "index.sqlite"
 COOKIE_FILE = SECRETS_DIR / "ao3_cookie.txt"
 
